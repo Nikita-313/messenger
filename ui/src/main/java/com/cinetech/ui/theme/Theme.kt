@@ -1,14 +1,17 @@
-package com.cinetech.messenger.ui.theme
+package com.cinetech.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
@@ -33,6 +36,25 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+private val LocalPaddings = staticCompositionLocalOf<Paddings> {
+    error("CompositionLocal LocalPaddings not present")
+}
+
+private val LocalSpacers = staticCompositionLocalOf<Spacers> {
+    error("CompositionLocal LocalSpacers not present")
+}
+
+
+val MaterialTheme.spacers: Spacers
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalSpacers.current
+
+val MaterialTheme.paddings: Paddings
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalPaddings.current
+
 @Composable
 fun MessengerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -53,6 +75,12 @@ fun MessengerTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
-        content = content
-    )
+    ){
+        CompositionLocalProvider(
+            LocalPaddings provides Paddings,
+            LocalSpacers provides Spacers
+        ) {
+            content()
+        }
+    }
 }

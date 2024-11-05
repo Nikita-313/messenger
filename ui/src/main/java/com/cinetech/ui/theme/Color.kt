@@ -1,4 +1,4 @@
-package com.cinetech.messenger.ui.theme
+package com.cinetech.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
