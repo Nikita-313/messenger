@@ -1,23 +1,18 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kps)
 }
 
 android {
-    namespace = "com.cinetech.messenger"
+    namespace = "com.cinetech.data"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.cinetech.messenger"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -33,17 +28,15 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
 }
 
 dependencies {
-    implementation(project(":ui"))
-    implementation(project(":data"))
     implementation(project(":domain"))
+    implementation(group = "javax.inject", name = "javax.inject", version = "1")
 
-    implementation(libs.google.dagger.hilt)
+    api(libs.bundles.retrofit)
+    api(libs.squareup.retrofit2.converter.gson)
+
+    api(libs.bundles.room)
+    ksp(libs.android.room.compiler)
 }

@@ -1,4 +1,4 @@
-package com.cinetech.messenger
+package com.cinetech.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
