@@ -42,6 +42,8 @@ android {
 dependencies {
     implementation(project(":domain"))
 
+    implementation(libs.googlecode)
+
     implementation(libs.bundles.navigation)
 
     implementation(libs.bundles.hilt)

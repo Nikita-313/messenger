@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_screen_title">Авторизация</string>
+    <string name="auth_screen_support_text">Проверьте код страны и введите свой номер телефона.</string>
+    <string name="auth_screen_phone_number">Номер телефона</string>
+
+    <string name="select_country_code_title">Выберите страну</string>
+</resources>
