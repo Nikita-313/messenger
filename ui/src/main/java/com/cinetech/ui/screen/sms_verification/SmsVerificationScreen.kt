@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -38,10 +40,12 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cinetech.ui.R
 import com.cinetech.ui.core.MaskVisualTransformation
@@ -84,14 +88,14 @@ fun SmsVerificationScreen(
     Scaffold(
         modifier = Modifier.imePadding(),
         topBar = { TopBar(onPop) },
-        floatingActionButton = { NextFloatingActionButton(viewModel::sendSmsCode) }
+        floatingActionButton = { NextFloatingActionButton(state.isLoading, viewModel::checkSmsCode) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
                 .padding(MaterialTheme.paddings.extraLarge)
-                .padding(top = MaterialTheme.paddings.xxLarge)
+                .padding(top = MaterialTheme.paddings.extraLarge)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -101,7 +105,8 @@ fun SmsVerificationScreen(
                 modifier = Modifier.graphicsLayer(translationX = invalidSmsAnimation.value),
                 code = state.smsCode,
                 onValueChange = viewModel::onSmsCodeTextChange,
-                onGo = viewModel::sendSmsCode
+                onGo = viewModel::checkSmsCode,
+                supportingText = state.errorTextRId,
             )
         }
     }
@@ -110,6 +115,7 @@ fun SmsVerificationScreen(
 @Composable
 private fun SmsTextField(
     modifier: Modifier = Modifier,
+    supportingText: Int?,
     code: String,
     onValueChange: (String) -> Unit,
     onGo: () -> Unit
@@ -123,6 +129,14 @@ private fun SmsTextField(
     OutlinedTextField(
         modifier = modifier.focusRequester(focusRequester),
         value = code,
+        supportingText = if (supportingText != null) {
+            {
+                Text(
+                    stringResource(supportingText),
+                    style = TextStyle(color = MaterialTheme.colorScheme.error)
+                )
+            }
+        } else { {} },
         onValueChange = onValueChange,
         visualTransformation = MaskVisualTransformation("### ###"),
         keyboardOptions = KeyboardOptions(
@@ -139,12 +153,23 @@ private fun SmsTextField(
 }
 
 @Composable
-private fun NextFloatingActionButton(onClick: () -> Unit) {
+private fun NextFloatingActionButton(
+    isLoading: Boolean,
+    onClick: () -> Unit
+) {
     FloatingActionButton(
         onClick = onClick,
         containerColor = MaterialTheme.colorScheme.primary,
     ) {
-        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "")
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(25.dp),
+                strokeWidth = 2.dp,
+                color = MaterialTheme.colorScheme.onPrimary,
+            )
+        } else {
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "")
+        }
     }
 }
 

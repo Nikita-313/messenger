@@ -26,13 +26,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +40,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,6 +63,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -75,6 +77,7 @@ import com.cinetech.ui.screen.auth.model.Country
 import com.cinetech.ui.theme.paddings
 import com.cinetech.ui.theme.spacers
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthScreen(
     viewModel: AuthViewModel = hiltViewModel(),
@@ -103,14 +106,22 @@ fun AuthScreen(
                         },
                     )
                 }
+
+                is AuthUiEffect.NavigateTo -> {
+                    onNavigate(it.screen)
+                }
             }
         }
     }
 
     Scaffold(
         modifier = Modifier.imePadding(),
+        topBar = { TopAppBar(title = {}) },
         floatingActionButton = {
-            AuthFloatingActionButton(onClick = viewModel::sendSmsCode)
+            AuthFloatingActionButton(
+                onClick = viewModel::sendSmsCode,
+                isLoading = state.isLoading
+            )
         }
     ) { paddingValues ->
         Column(
@@ -118,7 +129,7 @@ fun AuthScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
                 .padding(MaterialTheme.paddings.extraLarge)
-                .padding(top = MaterialTheme.paddings.xxLarge)
+                .padding(top = MaterialTheme.paddings.extraLarge)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -126,38 +137,53 @@ fun AuthScreen(
             Spacer(modifier = Modifier.height(MaterialTheme.spacers.extraLarge))
             PhoneTextField(
                 modifier = Modifier.graphicsLayer(translationX = invalidPhoneAnimation.value),
+                supportTextRId = state.errorTextRId,
                 countryCode = state.countyCode,
                 phoneNumber = state.phoneNumber,
                 country = state.country,
                 onCountryCodeChange = viewModel::onCountyCodeChange,
                 onPhoneNumberChange = viewModel::onPhoneNumberChange,
                 onSelectCountry = { onNavigate(Screen.SelectCountryCode) },
-                onGo =  viewModel::sendSmsCode
+                onGo = viewModel::sendSmsCode
             )
         }
     }
 }
 
 @Composable
-private fun AuthFloatingActionButton(onClick: () -> Unit) {
+private fun AuthFloatingActionButton(
+    isLoading: Boolean,
+    onClick: () -> Unit
+) {
     FloatingActionButton(
-        onClick = onClick,
+        onClick = {
+            if (!isLoading) onClick()
+        },
         containerColor = MaterialTheme.colorScheme.primary,
     ) {
-        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "")
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(25.dp),
+                strokeWidth = 2.dp,
+                color = MaterialTheme.colorScheme.onPrimary,
+            )
+        } else {
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "")
+        }
     }
 }
 
 @Composable
 private fun PhoneTextField(
     modifier: Modifier = Modifier,
-    countryCode: String,
-    phoneNumber: String,
+    supportTextRId: Int?,
+    countryCode: TextFieldValue,
+    phoneNumber: TextFieldValue,
     country: Country?,
-    onCountryCodeChange: (String) -> Unit,
-    onPhoneNumberChange: (String) -> Unit,
+    onCountryCodeChange: (TextFieldValue) -> Unit,
+    onPhoneNumberChange: (TextFieldValue) -> Unit,
     onSelectCountry: () -> Unit,
-    onGo:()->Unit
+    onGo: () -> Unit
 ) {
 
     val countryCodeFocusRequester = remember { FocusRequester() }
@@ -168,15 +194,10 @@ private fun PhoneTextField(
         disabledBorderColor = Color.Transparent,
         focusedBorderColor = Color.Transparent,
         unfocusedBorderColor = Color.Transparent,
-        cursorColor = MaterialTheme.colorScheme.onBackground,
-        selectionColors = TextSelectionColors(
-            backgroundColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.1f),
-            handleColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.1f)
-        )
     )
 
     LaunchedEffect(Unit) {
-        if (countryCode.isEmpty()) countryCodeFocusRequester.requestFocus()
+        if (countryCode.text.isEmpty()) countryCodeFocusRequester.requestFocus()
         else phoneNumberFocusRequester.requestFocus()
     }
 
@@ -184,7 +205,7 @@ private fun PhoneTextField(
         modifier = modifier
     ) {
         Row(
-            modifier = Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primary), shape = RoundedCornerShape(8.dp)),
+            modifier = Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primary), shape = OutlinedTextFieldDefaults.shape),
             verticalAlignment = Alignment.CenterVertically
         ) {
             OutlinedTextField(
@@ -194,7 +215,7 @@ private fun PhoneTextField(
                 value = countryCode,
                 onValueChange = {
                     onCountryCodeChange(it)
-                    if (it.length == 3) phoneNumberFocusRequester.requestFocus()
+                    if (it.text.length == 3) phoneNumberFocusRequester.requestFocus()
                 },
                 singleLine = true,
                 prefix = {
@@ -220,9 +241,9 @@ private fun PhoneTextField(
                     modifier = Modifier
                         .focusRequester(phoneNumberFocusRequester)
                         .onKeyEvent { keyEvent ->
-                            if (keyEvent.key == Key.Backspace && phoneNumber.isEmpty()) {
-                                onCountryCodeChange(countryCode.dropLast(1))
-                                countryCodeFocusRequester.requestFocus()
+                            if (keyEvent.key == Key.Backspace && phoneNumber.text.isEmpty()) {
+                               onCountryCodeChange(countryCode.copy(text = countryCode.text.dropLast(1)))
+                               countryCodeFocusRequester.requestFocus()
                             }
                             true
                         },
@@ -251,6 +272,17 @@ private fun PhoneTextField(
             text = stringResource(R.string.auth_screen_phone_number),
             style = MaterialTheme.typography.bodySmall
         )
+
+        if (supportTextRId != null) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .offset(y = MaterialTheme.paddings.medium),
+                text = stringResource(supportTextRId),
+                style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.error)
+            )
+        }
+
     }
 
 

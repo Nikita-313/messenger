@@ -6,8 +6,12 @@
 
     <string name="select_country_code_title">Выберите страну</string>
 
-
     <string name="sms_verification_screen_title">СМС верификация</string>
     <string name="sms_verification_screen_support_text">Введите код подтверждения из смс</string>
     <string name="sms_verification_screen_sms_code">Код из смс</string>
+
+    <string name="exception_no_internet_connection">Нет подключения к интернету</string>
+    <string name="exception_validation_error">Неверный формат</string>
+    <string name="exception_unknown">Неизвестная ошибка</string>
+    <string name="exception_invalid_sms_code">Неверный код</string>
 </resources>

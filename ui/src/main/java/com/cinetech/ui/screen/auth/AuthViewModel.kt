@@ -1,16 +1,30 @@
 package com.cinetech.ui.screen.auth
 
+import android.util.Log
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.text.isDigitsOnly
+import androidx.lifecycle.viewModelScope
+import com.cinetech.domain.exeption.ValidationException
+import com.cinetech.domain.repository.AuthRepository
+import com.cinetech.domain.utils.Response
+import com.cinetech.ui.R
 import com.cinetech.ui.base.BaseViewModel
+import com.cinetech.ui.navigation.Screen
 import com.cinetech.ui.screen.auth.model.AuthUiEffect
 import com.cinetech.ui.screen.auth.model.AuthUiEvent
 import com.cinetech.ui.screen.auth.model.AuthUiState
 import com.cinetech.ui.screen.auth.model.Country
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import java.net.UnknownHostException
 import java.util.Locale
 import javax.inject.Inject
 
-class AuthViewModel @Inject constructor() : BaseViewModel<AuthUiState, AuthUiEvent, AuthUiEffect>(
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val authRepository: AuthRepository,
+) : BaseViewModel<AuthUiState, AuthUiEvent, AuthUiEffect>(
     initialState = AuthUiState(),
     reducer = AuthUiReducer(),
 ) {
@@ -21,43 +35,88 @@ class AuthViewModel @Inject constructor() : BaseViewModel<AuthUiState, AuthUiEve
         setDefaultCountry()
     }
 
-    fun onSelectCountry(country: Country){
-        sendEvent(AuthUiEvent.OnCountryCodeTextChange(country.phoneCode, country))
+    fun onSelectCountry(country: Country) {
+        sendEvent(AuthUiEvent.OnCountryCodeTextChange(TextFieldValue(country.phoneCode), country))
     }
 
-    fun onCountyCodeChange(newValue: String) {
+    fun onCountyCodeChange(textFieldValue: TextFieldValue) {
+        val newValue = textFieldValue.text
+        if (state.value.isLoading) return
         if (newValue.length == 1 && newValue.first() == '0') return
         if (newValue.isDigitsOnly() && newValue.length <= 3) {
             val country = if (newValue.isNotEmpty()) getCountryNameByCountryCode(newValue.toInt()) else null
-            sendEvent(AuthUiEvent.OnCountryCodeTextChange(newValue, countries[country]))
+            sendEvent(AuthUiEvent.OnCountryCodeTextChange(textFieldValue, countries[country]))
         }
     }
 
-    fun onPhoneNumberChange(newValue: String) {
+    fun onPhoneNumberChange(textFieldValue: TextFieldValue) {
+        val newValue = textFieldValue.text
+        if (state.value.isLoading) return
         if (newValue.isDigitsOnly() && newValue.length <= 10) {
-            sendEvent(AuthUiEvent.OnPhoneNumberTextChange(newValue))
+            sendEvent(AuthUiEvent.OnPhoneNumberTextChange(textFieldValue))
         }
     }
 
-    fun sendSmsCode(){
-        if(!checkPhoneNumberValid()) {
+    fun sendSmsCode() {
+        if (!checkPhoneNumberValid()) {
             sendEffect(AuthUiEffect.PhoneNumberInvalid)
             return
         }
 
+        val phone = "+" + state.value.countyCode.text + state.value.phoneNumber.text
+
+        viewModelScope.launch {
+            authRepository.sendAuthCode(phone).collect { response ->
+                when (response) {
+                    is Response.Error -> {
+                        sendEvent(AuthUiEvent.Loading(false))
+                        errorHandler(response.throwable)
+                    }
+
+                    Response.Loading -> {
+                        sendEvent(AuthUiEvent.Loading(true))
+                    }
+
+                    is Response.Success -> {
+                        sendEvent(AuthUiEvent.Loading(false))
+                        sendEffect(AuthUiEffect.NavigateTo(Screen.SmsVerification(phone)))
+                    }
+
+                    Response.Timeout -> {
+                        sendEvent(AuthUiEvent.Loading(false))
+                    }
+                }
+            }
+        }
 
     }
 
-    private fun checkPhoneNumberValid():Boolean{
-        if(state.value.phoneNumber.length < 6) return false
-        if(state.value.countyCode.isEmpty()) return false
+    private fun errorHandler(throwable: Throwable?) {
+        if (throwable == null) return
+        Log.e("AuthViewModel errorHandler", throwable.stackTraceToString())
+        when (throwable) {
+            is UnknownHostException -> {
+                sendEventForEffect(AuthUiEvent.ShowError(R.string.exception_no_internet_connection))
+            }
+            is ValidationException -> {
+                sendEventForEffect(AuthUiEvent.ShowError(R.string.exception_validation_error))
+            }
+            else -> {
+                sendEventForEffect(AuthUiEvent.ShowError(R.string.exception_unknown))
+            }
+        }
+    }
+
+    private fun checkPhoneNumberValid(): Boolean {
+        if (state.value.phoneNumber.text.length < 6) return false
+        if (state.value.countyCode.text.isEmpty()) return false
         return true
     }
 
     private fun setDefaultCountry() {
         val country = countries[Locale.getDefault().country]
-        if (country != null){
-            sendEvent(AuthUiEvent.OnCountryCodeTextChange(country.phoneCode, country))
+        if (country != null) {
+            sendEvent(AuthUiEvent.OnCountryCodeTextChange(TextFieldValue(country.phoneCode), country))
         }
     }
 

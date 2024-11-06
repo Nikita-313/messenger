@@ -13,6 +13,14 @@ class SmsVerificationReducer : Reducer<SmsVerificationUiState, SmsVerificationUi
             is SmsVerificationUiEvent.OnSmsCodeTextChange -> {
                 previousState.copy(smsCode = event.newValue) to null
             }
+
+            is SmsVerificationUiEvent.Loading -> {
+                previousState.copy(isLoading = event.isLoading) to null
+            }
+
+            is SmsVerificationUiEvent.ShowError -> {
+                previousState.copy(errorTextRId = event.rId) to  SmsVerificationUiEffect.SmsCodeInvalid
+            }
         }
     }
 

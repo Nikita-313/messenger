@@ -14,5 +14,5 @@ sealed interface Screen {
     data object SelectCountryCode : Screen
 
     @Serializable
-    data object SmsVerification: Screen
+    data class SmsVerification(val phone:String): Screen
 }
