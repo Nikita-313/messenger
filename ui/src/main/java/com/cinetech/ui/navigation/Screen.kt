@@ -12,4 +12,7 @@ sealed interface Screen {
 
     @Serializable
     data object SelectCountryCode : Screen
+
+    @Serializable
+    data object SmsVerification: Screen
 }

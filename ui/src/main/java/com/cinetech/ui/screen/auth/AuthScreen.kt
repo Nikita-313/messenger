@@ -82,7 +82,7 @@ fun AuthScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    val myAnimation = remember {
+    val invalidPhoneAnimation = remember {
         Animatable(
             initialValue = 0f,
             typeConverter = Float.VectorConverter
@@ -93,7 +93,7 @@ fun AuthScreen(
         viewModel.effect.collect {
             when (it) {
                 AuthUiEffect.PhoneNumberInvalid -> {
-                    myAnimation.animateTo(
+                    invalidPhoneAnimation.animateTo(
                         targetValue = 0f,
                         animationSpec = keyframes {
                             durationMillis = 100
@@ -110,7 +110,7 @@ fun AuthScreen(
     Scaffold(
         modifier = Modifier.imePadding(),
         floatingActionButton = {
-            AuthFloatingActionButton { viewModel.sendSmsCode() }
+            AuthFloatingActionButton(onClick = viewModel::sendSmsCode)
         }
     ) { paddingValues ->
         Column(
@@ -125,13 +125,14 @@ fun AuthScreen(
             TopLabel()
             Spacer(modifier = Modifier.height(MaterialTheme.spacers.extraLarge))
             PhoneTextField(
-                modifier = Modifier.graphicsLayer(translationX = myAnimation.value),
+                modifier = Modifier.graphicsLayer(translationX = invalidPhoneAnimation.value),
                 countryCode = state.countyCode,
                 phoneNumber = state.phoneNumber,
                 country = state.country,
                 onCountryCodeChange = viewModel::onCountyCodeChange,
                 onPhoneNumberChange = viewModel::onPhoneNumberChange,
-                onSelectCountry = { onNavigate(Screen.SelectCountryCode) }
+                onSelectCountry = { onNavigate(Screen.SelectCountryCode) },
+                onGo =  viewModel::sendSmsCode
             )
         }
     }
@@ -142,7 +143,6 @@ private fun AuthFloatingActionButton(onClick: () -> Unit) {
     FloatingActionButton(
         onClick = onClick,
         containerColor = MaterialTheme.colorScheme.primary,
-        contentColor = Color.White
     ) {
         Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "")
     }
@@ -157,6 +157,7 @@ private fun PhoneTextField(
     onCountryCodeChange: (String) -> Unit,
     onPhoneNumberChange: (String) -> Unit,
     onSelectCountry: () -> Unit,
+    onGo:()->Unit
 ) {
 
     val countryCodeFocusRequester = remember { FocusRequester() }
@@ -231,7 +232,10 @@ private fun PhoneTextField(
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.None,
                         keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Go
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onGo = { onGo() }
                     ),
                     visualTransformation = MaskVisualTransformation("### ### ####"),
                     suffix = { EmojiFlagAnimation(country, onSelectCountry) },

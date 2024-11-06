@@ -10,6 +10,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.cinetech.ui.screen.auth.AuthScreen
 import com.cinetech.ui.screen.auth.SelectCountryCodeScreen
+import com.cinetech.ui.screen.sms_verification.SmsVerificationScreen
 
 @Composable
 fun MessengerNavHost(
@@ -19,6 +20,12 @@ fun MessengerNavHost(
         navController = navHostController,
         startDestination = Screen.AuthGraph
     ) {
+
+        composable<Screen.SmsVerification> {
+            SmsVerificationScreen(
+                onPop = { navHostController.popBackStack() }
+            )
+        }
 
         navigation<Screen.AuthGraph>(startDestination = Screen.Auth) {
 
