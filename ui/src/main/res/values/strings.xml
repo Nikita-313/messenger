@@ -22,4 +22,6 @@
     <string name="registration_screen_name">Имя пользователя</string>
     <string name="registration_screen_user_name">Username пользователя</string>
     <string name="registration_exception_bad_request">Некорректный запрос. Проверьте введённые данные и попробуйте снова</string>
+
+    <string name="main_screen_title">Messanger</string>
 </resources>

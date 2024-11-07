@@ -20,7 +20,7 @@ fun MessengerNavHost(
 ) {
     NavHost(
         navController = navHostController,
-        startDestination = Screen.AuthGraph
+        startDestination = Screen.Main
     ) {
 
         composable<Screen.Main> {
