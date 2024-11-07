@@ -15,6 +15,7 @@
     <string name="sms_verification_screen_support_text">Введите код подтверждения из смс</string>
     <string name="sms_verification_screen_sms_code">Код из смс</string>
     <string name="sms_verification_exception_invalid_sms_code">Неверный код</string>
+    <string name="sms_verification_exception">Ошибка авторизации</string>
 
     <string name="registration_screen_title">Регистрация</string>
     <string name="registration_screen_phone_number">Номер телефона</string>

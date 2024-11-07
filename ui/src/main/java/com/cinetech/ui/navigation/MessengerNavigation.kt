@@ -10,6 +10,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.cinetech.ui.screen.auth.AuthScreen
 import com.cinetech.ui.screen.auth.SelectCountryCodeScreen
+import com.cinetech.ui.screen.main.MainScreen
 import com.cinetech.ui.screen.registration.RegistrationScreen
 import com.cinetech.ui.screen.sms_verification.SmsVerificationScreen
 
@@ -22,16 +23,20 @@ fun MessengerNavHost(
         startDestination = Screen.AuthGraph
     ) {
 
+        composable<Screen.Main> {
+            MainScreen()
+        }
+
         composable<Screen.SmsVerification> {
             SmsVerificationScreen(
                 onPop = { navHostController.popBackStack() },
                 onNavigate = { screen ->
-                    if(screen is Screen.Registration) {
-                        navHostController.navigate(screen){
-                            popUpTo(Screen.Auth){ inclusive = false }
+                    if (screen is Screen.Registration) {
+                        navHostController.navigate(screen) {
+                            popUpTo(Screen.Auth) { inclusive = false }
                         }
                     } else {
-                        navHostController.navigate(screen){
+                        navHostController.navigate(screen) {
                             popUpTo(0)
                         }
                     }
@@ -41,7 +46,12 @@ fun MessengerNavHost(
 
         composable<Screen.Registration> {
             RegistrationScreen(
-                onPop = { navHostController.popBackStack() }
+                onPop = { navHostController.popBackStack() },
+                onNavigate = { screen ->
+                    navHostController.navigate(screen) {
+                        popUpTo(0)
+                    }
+                }
             )
         }
 

@@ -4,9 +4,12 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.cinetech.domain.JwtToken
 import com.cinetech.domain.exeption.BadRequestException
 import com.cinetech.domain.exeption.ValidationException
+import com.cinetech.domain.model.RegisterAuthData
 import com.cinetech.domain.model.RegisterUserData
+import com.cinetech.domain.repository.JwtTokenRepository
 import com.cinetech.domain.repository.RegistrationRepository
 import com.cinetech.domain.utils.Response
 import com.cinetech.ui.R
@@ -23,7 +26,8 @@ import javax.inject.Inject
 @HiltViewModel
 class RegistrationViewModel @Inject constructor(
     savedState: SavedStateHandle,
-    private val registrationRepository: RegistrationRepository
+    private val registrationRepository: RegistrationRepository,
+    private val jwtTokenRepository: JwtTokenRepository,
 ) : BaseViewModel<RegistrationUiState, RegistrationUiEvent, RegistrationUiEffect>(
     initialState = RegistrationUiState(),
     reducer = RegistrationReducer(),
@@ -61,12 +65,27 @@ class RegistrationViewModel @Inject constructor(
                     }
                     is Response.Success -> {
                         sendEvent(RegistrationUiEvent.Loading(false))
+                        onRegisterSuccess(response.result)
                     }
                     Response.Timeout -> {
                         sendEvent(RegistrationUiEvent.Loading(false))
                     }
                 }
             }
+        }
+    }
+
+    private fun onRegisterSuccess(registerAuthData: RegisterAuthData){
+
+        if(registerAuthData.accessToken == null || registerAuthData.refreshToken == null) {
+            sendEffect(RegistrationUiEffect.ShowToast(R.string.sms_verification_exception))
+            sendEffect(RegistrationUiEffect.NavigateTo(Screen.Auth))
+            return
+        }
+
+        viewModelScope.launch {
+            jwtTokenRepository.save(JwtToken(accessToken = registerAuthData.accessToken!!, refreshToken = registerAuthData.refreshToken!!))
+            sendEffect(RegistrationUiEffect.NavigateTo(Screen.Main))
         }
     }
 

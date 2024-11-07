@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cinetech.ui.R
 import com.cinetech.ui.core.MaskVisualTransformation
+import com.cinetech.ui.navigation.Screen
 import com.cinetech.ui.screen.registration.model.RegistrationUiEffect
 import com.cinetech.ui.theme.paddings
 import com.cinetech.ui.theme.spacers
@@ -59,8 +60,9 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun RegistrationScreen(
+    viewModel: RegistrationViewModel = hiltViewModel(),
     onPop: () -> Unit,
-    viewModel: RegistrationViewModel = hiltViewModel()
+    onNavigate: (Screen) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -81,9 +83,9 @@ fun RegistrationScreen(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        viewModel.effect.collect{
+        viewModel.effect.collect {
             launch {
-                when(it){
+                when (it) {
                     RegistrationUiEffect.NameInvalid -> {
                         invalidNameAnimation.animateTo(
                             targetValue = 0f,
@@ -95,6 +97,7 @@ fun RegistrationScreen(
                             },
                         )
                     }
+
                     RegistrationUiEffect.UserNameInvalid -> {
                         invalidUserNameAnimation.animateTo(
                             targetValue = 0f,
@@ -108,7 +111,11 @@ fun RegistrationScreen(
                     }
 
                     is RegistrationUiEffect.ShowToast -> {
-                        Toast.makeText(context,context.getString(it.rId),Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(it.rId), Toast.LENGTH_SHORT).show()
+                    }
+
+                    is RegistrationUiEffect.NavigateTo -> {
+                        onNavigate(it.screen)
                     }
                 }
             }
@@ -154,9 +161,17 @@ private fun PhoneNumberTextField(
     phone: String,
 ) {
     val phoneMask = when (phone.length) {
-        12 -> { "## ### ### ####" }
-        13 -> { "### ### ### ####" }
-        else -> { "#### ### ### ####" }
+        12 -> {
+            "## ### ### ####"
+        }
+
+        13 -> {
+            "### ### ### ####"
+        }
+
+        else -> {
+            "#### ### ### ####"
+        }
     }
 
     OutlinedTextField(

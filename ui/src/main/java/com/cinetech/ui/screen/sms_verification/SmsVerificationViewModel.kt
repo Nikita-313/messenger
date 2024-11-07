@@ -5,9 +5,12 @@ import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.cinetech.domain.JwtToken
 import com.cinetech.domain.exeption.NotFoundException
 import com.cinetech.domain.exeption.ValidationException
+import com.cinetech.domain.model.LoginAuthData
 import com.cinetech.domain.repository.AuthRepository
+import com.cinetech.domain.repository.JwtTokenRepository
 import com.cinetech.domain.utils.Response
 import com.cinetech.ui.R
 import com.cinetech.ui.base.BaseViewModel
@@ -24,6 +27,7 @@ import javax.inject.Inject
 class SmsVerificationViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val authRepository: AuthRepository,
+    private val jwtTokenRepository: JwtTokenRepository
 ) : BaseViewModel<SmsVerificationUiState, SmsVerificationUiEvent, SmsVerificationUiEffect>(
     initialState = SmsVerificationUiState(),
     reducer = SmsVerificationReducer(),
@@ -56,7 +60,7 @@ class SmsVerificationViewModel @Inject constructor(
 
                     is Response.Success -> {
                         sendEvent(SmsVerificationUiEvent.Loading(false))
-                        selectNavigation(response.result.isUserExists)
+                        onSmsCheckSuccess(response.result)
                     }
 
                     Response.Timeout -> {
@@ -67,10 +71,26 @@ class SmsVerificationViewModel @Inject constructor(
         }
     }
 
-    private fun selectNavigation(isUserExists: Boolean) {
-        if(isUserExists) sendEffect(SmsVerificationUiEffect.NavigateTo(Screen.Auth)) //ToDo navigate to mainScreen
-        else sendEffect(SmsVerificationUiEffect.NavigateTo(Screen.Registration(phoneNumber)))
+    private fun onSmsCheckSuccess(loginAuthData: LoginAuthData) {
+
+        if(!loginAuthData.isUserExists) {
+            sendEffect(SmsVerificationUiEffect.NavigateTo(Screen.Registration(phoneNumber)))
+            return
+        }
+
+        if(loginAuthData.accessToken == null || loginAuthData.refreshToken == null) {
+            sendEffect(SmsVerificationUiEffect.ShowToast(R.string.sms_verification_exception))
+            sendEffect(SmsVerificationUiEffect.NavigateTo(Screen.Auth))
+            return
+        }
+
+        viewModelScope.launch {
+            jwtTokenRepository.save(JwtToken(accessToken = loginAuthData.accessToken!!, refreshToken = loginAuthData.refreshToken!!))
+            sendEffect(SmsVerificationUiEffect.NavigateTo(Screen.Main))
+        }
+
     }
+
 
     private fun errorHandler(throwable: Throwable?) {
         if (throwable == null) return

@@ -18,4 +18,7 @@ sealed interface Screen {
 
     @Serializable
     data class Registration(val phone: String) : Screen
+
+    @Serializable
+    data object Main: Screen
 }

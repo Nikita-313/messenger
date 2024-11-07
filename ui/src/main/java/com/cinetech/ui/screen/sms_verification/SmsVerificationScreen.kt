@@ -1,5 +1,6 @@
 package com.cinetech.ui.screen.sms_verification
 
+import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.keyframes
@@ -39,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -69,6 +71,8 @@ fun SmsVerificationScreen(
         )
     }
 
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         viewModel.effect.collect {
             when (it) {
@@ -85,6 +89,9 @@ fun SmsVerificationScreen(
                             0f at 100
                         },
                     )
+                }
+                is SmsVerificationUiEffect.ShowToast -> {
+                    Toast.makeText(context,context.getString(it.rId), Toast.LENGTH_SHORT).show()
                 }
             }
         }
