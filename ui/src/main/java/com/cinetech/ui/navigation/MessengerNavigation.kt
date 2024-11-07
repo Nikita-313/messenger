@@ -19,18 +19,29 @@ fun MessengerNavHost(
 ) {
     NavHost(
         navController = navHostController,
-        startDestination = Screen.Registration("")
+        startDestination = Screen.AuthGraph
     ) {
 
         composable<Screen.SmsVerification> {
             SmsVerificationScreen(
-                onPop = { navHostController.popBackStack() }
+                onPop = { navHostController.popBackStack() },
+                onNavigate = { screen ->
+                    if(screen is Screen.Registration) {
+                        navHostController.navigate(screen){
+                            popUpTo(Screen.Auth){ inclusive = false }
+                        }
+                    } else {
+                        navHostController.navigate(screen){
+                            popUpTo(0)
+                        }
+                    }
+                }
             )
         }
 
         composable<Screen.Registration> {
             RegistrationScreen(
-                onPop = {navHostController.popBackStack()}
+                onPop = { navHostController.popBackStack() }
             )
         }
 

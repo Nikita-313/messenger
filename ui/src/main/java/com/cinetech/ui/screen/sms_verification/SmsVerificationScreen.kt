@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cinetech.ui.R
 import com.cinetech.ui.core.MaskVisualTransformation
+import com.cinetech.ui.navigation.Screen
 import com.cinetech.ui.screen.sms_verification.model.SmsVerificationUiEffect
 import com.cinetech.ui.theme.paddings
 import com.cinetech.ui.theme.spacers
@@ -56,7 +57,8 @@ import com.cinetech.ui.theme.spacers
 @Composable
 fun SmsVerificationScreen(
     viewModel: SmsVerificationViewModel = hiltViewModel(),
-    onPop: () -> Unit
+    onPop: () -> Unit,
+    onNavigate: (Screen) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -70,6 +72,9 @@ fun SmsVerificationScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect {
             when (it) {
+                is SmsVerificationUiEffect.NavigateTo -> {
+                    onNavigate(it.screen)
+                }
                 SmsVerificationUiEffect.SmsCodeInvalid -> {
                     invalidSmsAnimation.animateTo(
                         targetValue = 0f,
@@ -126,7 +131,9 @@ private fun SmsTextField(
     }
 
     OutlinedTextField(
-        modifier = modifier.fillMaxWidth().focusRequester(focusRequester),
+        modifier = modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester),
         value = code,
         supportingText = if (supportingText != null) {
             {
@@ -135,7 +142,9 @@ private fun SmsTextField(
                     style = TextStyle(color = MaterialTheme.colorScheme.error)
                 )
             }
-        } else { {} },
+        } else {
+            {}
+        },
         onValueChange = onValueChange,
         visualTransformation = MaskVisualTransformation("### ###"),
         keyboardOptions = KeyboardOptions(

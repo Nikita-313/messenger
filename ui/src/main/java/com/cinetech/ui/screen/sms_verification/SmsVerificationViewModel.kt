@@ -37,28 +37,40 @@ class SmsVerificationViewModel @Inject constructor(
         }
     }
 
-    fun checkSmsCode(){
-        if(!isSmsCodeValid()) {
+    fun checkSmsCode() {
+        if (!isSmsCodeValid()) {
             sendEffect(SmsVerificationUiEffect.SmsCodeInvalid)
         }
 
         viewModelScope.launch {
             authRepository.checkAuthCode(phone = phoneNumber, code = state.value.smsCode).collect { response ->
-                when (response){
+                when (response) {
                     is Response.Error -> {
                         sendEvent(SmsVerificationUiEvent.Loading(false))
                         errorHandler(response.throwable)
                     }
+
                     Response.Loading -> {
                         sendEvent(SmsVerificationUiEvent.Loading(true))
                     }
+
                     is Response.Success -> {
                         sendEvent(SmsVerificationUiEvent.Loading(false))
+                        selectNavigation(response.result.isUserExists)
                     }
-                    Response.Timeout -> { sendEvent(SmsVerificationUiEvent.Loading(false)) }
+
+                    Response.Timeout -> {
+                        sendEvent(SmsVerificationUiEvent.Loading(false))
+                    }
                 }
             }
         }
+    }
+
+    private fun selectNavigation(isUserExists: Boolean?) {
+        if(isUserExists == null) return
+        if(isUserExists) sendEffect(SmsVerificationUiEffect.NavigateTo(Screen.Auth)) //ToDo navigate to mainScreen
+        else sendEffect(SmsVerificationUiEffect.NavigateTo(Screen.Registration(phoneNumber)))
     }
 
     private fun errorHandler(throwable: Throwable?) {
@@ -68,21 +80,24 @@ class SmsVerificationViewModel @Inject constructor(
             is UnknownHostException -> {
                 sendEventForEffect(SmsVerificationUiEvent.ShowError(R.string.exception_no_internet_connection))
             }
+
             is ValidationException -> {
                 sendEventForEffect(SmsVerificationUiEvent.ShowError(R.string.exception_validation_error))
             }
+
             is NotFoundException -> {
-                sendEventForEffect(SmsVerificationUiEvent.ShowError(R.string.exception_invalid_sms_code))
+                sendEventForEffect(SmsVerificationUiEvent.ShowError(R.string.sms_verification_exception_invalid_sms_code))
             }
+
             else -> {
                 sendEventForEffect(SmsVerificationUiEvent.ShowError(R.string.exception_unknown))
             }
         }
     }
 
-    private fun isSmsCodeValid():Boolean{
+    private fun isSmsCodeValid(): Boolean {
         if (state.value.smsCode.isEmpty()) return false
-        if(state.value.smsCode.length < 6) return false
+        if (state.value.smsCode.length < 6) return false
         return true
     }
 

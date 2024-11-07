@@ -7,7 +7,7 @@ import com.cinetech.data.remote.model.SendAuthCodeRequest
 import com.cinetech.domain.exeption.NotFoundException
 import com.cinetech.domain.exeption.UnknownException
 import com.cinetech.domain.exeption.ValidationException
-import com.cinetech.domain.model.AuthData
+import com.cinetech.domain.model.LoginAuthData
 import com.cinetech.domain.repository.AuthRepository
 import com.cinetech.domain.utils.Response
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +21,7 @@ class AuthRepositoryImpl @Inject constructor(
     private val authService: AuthService
 ) : AuthRepository {
 
-    override suspend fun sendAuthCode(phone: String): Flow<Response<out Boolean>> {
+    override fun sendAuthCode(phone: String): Flow<Response<out Boolean>> {
         return flow {
             emit(Response.Loading)
             val response = authService.sendAuthCode(SendAuthCodeRequest(phone))
@@ -32,7 +32,7 @@ class AuthRepositoryImpl @Inject constructor(
             }
 
             val body = response.body() ?: throw UnknownException(response.message())
-            emit(Response.Success(body.isSuccess))
+            emit(Response.Success(body.is_success))
         }.catch { e ->
             emit(
                 Response.Error(
@@ -43,7 +43,7 @@ class AuthRepositoryImpl @Inject constructor(
         }.flowOn(Dispatchers.IO)
     }
 
-    override suspend fun checkAuthCode(phone: String, code: String): Flow<Response<out AuthData>> {
+    override fun checkAuthCode(phone: String, code: String): Flow<Response<out LoginAuthData>> {
         return flow {
             emit(Response.Loading)
             val response = authService.checkAuthCode(CheckAuthCodeRequest(phone = phone, code = code))
