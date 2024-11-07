@@ -67,8 +67,7 @@ class SmsVerificationViewModel @Inject constructor(
         }
     }
 
-    private fun selectNavigation(isUserExists: Boolean?) {
-        if(isUserExists == null) return
+    private fun selectNavigation(isUserExists: Boolean) {
         if(isUserExists) sendEffect(SmsVerificationUiEffect.NavigateTo(Screen.Auth)) //ToDo navigate to mainScreen
         else sendEffect(SmsVerificationUiEffect.NavigateTo(Screen.Registration(phoneNumber)))
     }
