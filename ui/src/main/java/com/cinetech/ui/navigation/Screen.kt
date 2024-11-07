@@ -21,4 +21,7 @@ sealed interface Screen {
 
     @Serializable
     data object Main: Screen
+
+    @Serializable
+    data object Chat: Screen
 }

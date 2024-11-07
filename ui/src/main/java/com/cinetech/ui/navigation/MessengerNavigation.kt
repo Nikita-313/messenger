@@ -10,6 +10,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.cinetech.ui.screen.auth.AuthScreen
 import com.cinetech.ui.screen.auth.SelectCountryCodeScreen
+import com.cinetech.ui.screen.chat.ChatScreen
 import com.cinetech.ui.screen.main.MainScreen
 import com.cinetech.ui.screen.registration.RegistrationScreen
 import com.cinetech.ui.screen.sms_verification.SmsVerificationScreen
@@ -20,8 +21,14 @@ fun MessengerNavHost(
 ) {
     NavHost(
         navController = navHostController,
-        startDestination = Screen.Main
+        startDestination = Screen.Chat
     ) {
+
+        composable<Screen.Chat> {
+            ChatScreen(
+                onPop = { navHostController.popBackStack() },
+            )
+        }
 
         composable<Screen.Main> {
             MainScreen()
