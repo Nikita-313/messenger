@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <string name="exception_no_internet_connection">Нет подключения к интернету</string>
+    <string name="exception_validation_error">Неверный формат</string>
+    <string name="exception_unknown">Неизвестная ошибка</string>
+    <string name="exception_invalid_sms_code">Неверный код</string>
+
     <string name="auth_screen_title">Авторизация</string>
     <string name="auth_screen_support_text">Проверьте код страны и введите свой номер телефона.</string>
     <string name="auth_screen_phone_number">Номер телефона</string>
@@ -10,8 +16,8 @@
     <string name="sms_verification_screen_support_text">Введите код подтверждения из смс</string>
     <string name="sms_verification_screen_sms_code">Код из смс</string>
 
-    <string name="exception_no_internet_connection">Нет подключения к интернету</string>
-    <string name="exception_validation_error">Неверный формат</string>
-    <string name="exception_unknown">Неизвестная ошибка</string>
-    <string name="exception_invalid_sms_code">Неверный код</string>
+    <string name="registration_screen_title">Регистрация</string>
+    <string name="registration_screen_phone_number">Номер телефона</string>
+    <string name="registration_screen_name">Имя пользователя</string>
+    <string name="registration_screen_user_name">Username пользователя</string>
 </resources>

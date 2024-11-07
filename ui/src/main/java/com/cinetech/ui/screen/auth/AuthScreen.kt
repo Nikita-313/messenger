@@ -126,11 +126,10 @@ fun AuthScreen(
     ) { paddingValues ->
         Column(
             modifier = Modifier
-                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .fillMaxSize()
-                .padding(MaterialTheme.paddings.extraLarge)
-                .padding(top = MaterialTheme.paddings.extraLarge)
-                .verticalScroll(rememberScrollState()),
+                .padding(paddingValues)
+                .padding(horizontal = MaterialTheme.paddings.extraLarge),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TopLabel()
@@ -250,6 +249,7 @@ private fun PhoneTextField(
                     value = phoneNumber,
                     onValueChange = onPhoneNumberChange,
                     singleLine = true,
+                    placeholder = { Text("000 000 0000") },
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.None,
                         keyboardType = KeyboardType.Number,

@@ -92,11 +92,10 @@ fun SmsVerificationScreen(
     ) { paddingValues ->
         Column(
             modifier = Modifier
-                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .fillMaxSize()
-                .padding(MaterialTheme.paddings.extraLarge)
-                .padding(top = MaterialTheme.paddings.extraLarge)
-                .verticalScroll(rememberScrollState()),
+                .padding(paddingValues)
+                .padding(horizontal = MaterialTheme.paddings.extraLarge),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TopLabel()
@@ -127,7 +126,7 @@ private fun SmsTextField(
     }
 
     OutlinedTextField(
-        modifier = modifier.focusRequester(focusRequester),
+        modifier = modifier.fillMaxWidth().focusRequester(focusRequester),
         value = code,
         supportingText = if (supportingText != null) {
             {
