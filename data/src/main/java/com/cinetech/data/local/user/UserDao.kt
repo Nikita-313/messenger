@@ -1,8 +1,10 @@
 package com.cinetech.data.local.user
 
+import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 
+@Dao
 interface UserDao {
 
     @Upsert

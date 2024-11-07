@@ -17,7 +17,7 @@ class AuthModule {
 
     @Provides
     @ViewModelScoped
-    fun provideAuthService(retrofit: Retrofit): AuthService = retrofit.create(AuthService::class.java)
+    fun provideAuthService(@NotAuthenticatedClient retrofit: Retrofit): AuthService = retrofit.create(AuthService::class.java)
 
 
     @Provides

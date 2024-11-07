@@ -24,7 +24,7 @@ class LocalModule {
         return Room.databaseBuilder(
             appContext,
             AppDatabase::class.java,
-            "Messenger"
+            "MyMessengerDatabase"
         ).build()
     }
 

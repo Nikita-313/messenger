@@ -16,7 +16,7 @@ class RegistrationModule {
 
     @Provides
     @ViewModelScoped
-    fun provideRegistrationService(retrofit: Retrofit): RegistrationService = retrofit.create(RegistrationService::class.java)
+    fun provideRegistrationService(@NotAuthenticatedClient retrofit: Retrofit): RegistrationService = retrofit.create(RegistrationService::class.java)
 
     @Provides
     @ViewModelScoped
