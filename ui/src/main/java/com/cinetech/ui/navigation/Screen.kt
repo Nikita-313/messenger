@@ -24,4 +24,7 @@ sealed interface Screen {
 
     @Serializable
     data object Chat: Screen
+
+    @Serializable
+    data object PersonalArea: Screen
 }

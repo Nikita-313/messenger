@@ -34,13 +34,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetech.ui.R
+import com.cinetech.ui.navigation.Screen
 import com.cinetech.ui.theme.paddings
 import com.cinetech.ui.theme.spacers
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    onNavigate: (Screen) -> Unit,
+) {
     Scaffold(
-        topBar = { TopBar(onNavigateClick = {}) }
+        topBar = { TopBar(onNavigateClick = { onNavigate(Screen.PersonalArea) }) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -52,7 +55,7 @@ fun MainScreen() {
                     message = "Как погода сегодня? Как погода сегодня? Как погода сегодня?",
                     date = "04.11.204",
                     notReadMessageCount = 4560,
-                    onClick = {}
+                    onClick = { onNavigate(Screen.Chat) }
                 )
             }
         }
@@ -164,7 +167,9 @@ private fun TopBar(
                     .size(40.dp)
             ) {
                 Icon(
-                    modifier = Modifier.size(27.dp).offset(y = (4).dp),
+                    modifier = Modifier
+                        .size(27.dp)
+                        .offset(y = (4).dp),
                     painter = painterResource(id = R.drawable.person),
                     contentDescription = "",
                     tint = MaterialTheme.colorScheme.primary

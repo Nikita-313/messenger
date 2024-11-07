@@ -12,6 +12,7 @@ import com.cinetech.ui.screen.auth.AuthScreen
 import com.cinetech.ui.screen.auth.SelectCountryCodeScreen
 import com.cinetech.ui.screen.chat.ChatScreen
 import com.cinetech.ui.screen.main.MainScreen
+import com.cinetech.ui.screen.personal_area.PersonalAreaScreen
 import com.cinetech.ui.screen.registration.RegistrationScreen
 import com.cinetech.ui.screen.sms_verification.SmsVerificationScreen
 
@@ -21,8 +22,14 @@ fun MessengerNavHost(
 ) {
     NavHost(
         navController = navHostController,
-        startDestination = Screen.Chat
+        startDestination = Screen.PersonalArea
     ) {
+
+        composable<Screen.PersonalArea> {
+            PersonalAreaScreen(
+                onPop = { navHostController.popBackStack() },
+            )
+        }
 
         composable<Screen.Chat> {
             ChatScreen(
@@ -31,7 +38,11 @@ fun MessengerNavHost(
         }
 
         composable<Screen.Main> {
-            MainScreen()
+            MainScreen(
+                onNavigate = { screen ->
+                    navHostController.navigate(screen)
+                }
+            )
         }
 
         composable<Screen.SmsVerification> {

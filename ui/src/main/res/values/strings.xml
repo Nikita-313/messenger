@@ -24,4 +24,12 @@
     <string name="registration_exception_bad_request">Некорректный запрос. Проверьте введённые данные и попробуйте снова</string>
 
     <string name="main_screen_title">Messanger</string>
+
+    <string name="personal_area_screen_title">Профиль</string>
+    <string name="personal_area_screen_user_info">Информация</string>
+    <string name="personal_area_screen_phone">Телефон</string>
+    <string name="personal_area_screen_nik_name">Никнейм</string>
+    <string name="personal_area_screen_about">О себе</string>
+    <string name="personal_area_screen_city">Город</string>
+    <string name="personal_area_screen_birthday">Дата рождения</string>
 </resources>
