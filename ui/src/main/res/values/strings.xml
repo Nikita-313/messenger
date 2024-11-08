@@ -32,4 +32,19 @@
     <string name="personal_area_screen_about">О себе</string>
     <string name="personal_area_screen_city">Город</string>
     <string name="personal_area_screen_birthday">Дата рождения</string>
+    <string name="personal_area_screen_select">Выбрать</string>
+    <string name="personal_area_screen_cansel">Отмена</string>
+
+    <string name="aries">Овен</string>
+    <string name="taurus">Телец</string>
+    <string name="gemini">Близнецы</string>
+    <string name="cancer">Рак</string>
+    <string name="leo">Лев</string>
+    <string name="virgo">Дева</string>
+    <string name="libra">Весы</string>
+    <string name="scorpio">Скорпион</string>
+    <string name="sagittarius">Стрелец</string>
+    <string name="capricorn">Козерог</string>
+    <string name="aquarius">Водолей</string>
+    <string name="pisces">Рыбы</string>
 </resources>

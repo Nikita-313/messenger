@@ -1,6 +1,7 @@
 package com.cinetech.data.remote
 
 import com.cinetech.data.remote.model.RefreshTokenRequest
+import com.cinetech.domain.JwtToken
 import com.cinetech.domain.repository.JwtTokenRepository
 import kotlinx.coroutines.runBlocking
 import okhttp3.Authenticator
@@ -25,25 +26,26 @@ class AuthAuthenticator @Inject constructor(
                 updatedToken
             } else {
                 val refreshToken = runBlocking { jwtTokenRepository.getRefreshToken() }
-                if (refreshToken != null) {
-                    val response = runBlocking { refreshJwtService.refreshAccessToken(RefreshTokenRequest(refreshToken)) }
-                    if(response.isSuccessful && response.body()?.access_token != null) {
-                        val token = response.body()?.access_token
-                        token?.let {
-                            runBlocking { jwtTokenRepository.updateAccessToken(it) }
-                        }
-                        token
-                    } else null
 
+                if (refreshToken != null) {
+                    val responseJwt = runBlocking { refreshJwtService.refreshAccessToken(RefreshTokenRequest(refreshToken)) }
+                    if (responseJwt.isSuccessful && responseJwt.body()?.access_token != null) {
+                        val newtToken = responseJwt.body()
+                        if (newtToken?.access_token != null && newtToken.refresh_token != null) {
+                            runBlocking { jwtTokenRepository.save(JwtToken(accessToken = newtToken.access_token, refreshToken = newtToken.refresh_token)) }
+                            newtToken.access_token
+                        } else null
+                    } else null
                 } else null
             }
 
             if (token == null) return null
-            return  response.request().newBuilder()
-                .header(HEADER_AUTHORIZATION, " $TOKEN_TYPE  $token " )
+            return response.request().newBuilder()
+                .header(HEADER_AUTHORIZATION, "$TOKEN_TYPE $token")
                 .build()
         }
     }
+
     companion object {
         const val HEADER_AUTHORIZATION = "Authorization"
         const val TOKEN_TYPE = "Bearer"

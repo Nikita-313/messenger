@@ -1,6 +1,7 @@
 package com.cinetech.messenger.di
 
 import com.cinetech.data.remote.AuthAuthenticator
+import com.cinetech.data.remote.RefreshJwtService
 import com.cinetech.data.remote.interceptor.AccessTokenInterceptor
 import dagger.Module
 import dagger.Provides
@@ -48,6 +49,13 @@ class RemoteModule {
             .addInterceptor(accessTokenInterceptor)
             .build()
     }
+
+    @Provides
+    @Singleton
+    fun provideRefreshJwtService(@NotAuthenticatedClient retrofit: Retrofit): RefreshJwtService {
+        return retrofit.create(RefreshJwtService::class.java)
+    }
+
 
     companion object {
         const val BASE_URL = "https://plannerok.ru"

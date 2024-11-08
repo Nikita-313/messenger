@@ -1,8 +1,9 @@
 package com.cinetech.data.mapping
 
-import com.cinetech.data.remote.model.AvatarResponse
+import com.cinetech.data.remote.model.AvatarApi
 import com.cinetech.data.remote.model.CheckAuthCodeResponse
 import com.cinetech.data.remote.model.GetUserResponse
+import com.cinetech.data.remote.model.ProfileDataApi
 import com.cinetech.data.remote.model.RegisterUserRequest
 import com.cinetech.data.remote.model.RegisterUserResponse
 import com.cinetech.domain.model.Avatar
@@ -36,9 +37,9 @@ fun RegisterUserResponse.toDomain(): RegisterAuthData {
     )
 }
 
-fun GetUserResponse.toDomain(): User {
+fun ProfileDataApi.toDomain(): User {
     return User(
-        userId = userId,
+        userId = id,
         name = name,
         username = username,
         birthday = birthday,
@@ -55,7 +56,7 @@ fun GetUserResponse.toDomain(): User {
         avatars = avatars?.toAvatar(),
     )
 }
-fun AvatarResponse.toAvatar(): Avatar {
+fun AvatarApi.toAvatar(): Avatar {
     return Avatar(
         avatar = avatar,
         bigAvatar = bigAvatar,

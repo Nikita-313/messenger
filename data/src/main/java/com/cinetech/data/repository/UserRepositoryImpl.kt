@@ -21,11 +21,9 @@ class UserRepositoryImpl @Inject constructor(
         return flow {
             emit(Response.Loading)
             val response = userService.getUser()
-
             if (!response.isSuccessful) throw UnknownException(response.message())
             val body = response.body() ?: throw UnknownException()
-
-            emit(Response.Success(body.toDomain()))
+            emit(Response.Success(body.profile_data.toDomain()))
         }.catch { e ->
             emit(
                 Response.Error(
