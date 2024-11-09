@@ -50,6 +50,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -494,7 +495,10 @@ private fun CustomTextField(
                     capitalization = KeyboardCapitalization.Sentences,
                     keyboardType = KeyboardType.Text,
                 ),
-                textStyle = MaterialTheme.typography.titleMedium,
+                cursorBrush = Brush.verticalGradient(
+                    colors = listOf(MaterialTheme.colorScheme.onBackground,MaterialTheme.colorScheme.onBackground)
+                ),
+                textStyle = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onBackground),
             )
         }
         if (enable) {
