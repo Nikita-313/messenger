@@ -15,5 +15,5 @@ data class User(
     val last: String?,
     val created: String?,
     val completedTask: Long?,
-    val avatars: Avatar?,
+    val avatars: AvatarsUrl?,
 )

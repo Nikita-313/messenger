@@ -3,8 +3,10 @@ package com.cinetech.messenger.di
 import android.content.Context
 import androidx.room.Room
 import com.cinetech.data.local.AppDatabase
+import com.cinetech.data.repository.AvatarRepositoryImpl
 import com.cinetech.data.repository.JwtTokenRepositoryImpl
 import com.cinetech.data.repository.UserLocalRepositoryImpl
+import com.cinetech.domain.repository.AvatarRepository
 import com.cinetech.domain.repository.JwtTokenRepository
 import com.cinetech.domain.repository.UserLocalRepository
 import dagger.Module
@@ -34,4 +36,8 @@ class LocalModule {
 
     @Provides
     fun provideUserLocalRepository(appDatabase: AppDatabase): UserLocalRepository = UserLocalRepositoryImpl(appDatabase.userDao())
+
+
+    @Provides
+    fun provideAvatarRepository(appDatabase: AppDatabase): AvatarRepository = AvatarRepositoryImpl(appDatabase.avatarDao())
 }

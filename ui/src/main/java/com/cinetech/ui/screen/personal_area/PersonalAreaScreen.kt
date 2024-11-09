@@ -1,5 +1,6 @@
 package com.cinetech.ui.screen.personal_area
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,6 +27,8 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,11 +44,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -59,8 +64,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.cinetech.domain.model.User
 import com.cinetech.ui.R
 import com.cinetech.ui.core.MaskVisualTransformation
-import com.cinetech.ui.core.getZodiacSignRId
-import com.cinetech.ui.core.iso8601ToDateString
+import com.cinetech.ui.screen.personal_area.model.PersonalAreaUiEffect
+import com.cinetech.ui.screen.personal_area.utils.getZodiacSignRId
 import com.cinetech.ui.theme.paddings
 import com.cinetech.ui.theme.spacers
 
@@ -72,11 +77,22 @@ fun PersonalAreaScreen(
 ) {
 
     val state by viewModel.state.collectAsState()
-    val context = LocalContext.current
+
     val singlePhonePikerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> viewModel.onImageSelect(uri, context) }
+        onResult = viewModel::onImageSelect
     )
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect {
+            when (it) {
+                is PersonalAreaUiEffect.ShowToast -> {
+                    Toast.makeText(context, context.getString(it.rId), Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.imePadding(),
@@ -85,36 +101,49 @@ fun PersonalAreaScreen(
                 title = stringResource(R.string.personal_area_screen_title),
                 isEditMode = state.isEditModeEnabled,
                 onBackClick = onPop,
-                onCanselEdit = viewModel::disableEditMode,
+                isUpdateDataLoading = state.isUpdateDataLoading,
+                isShowEdit = !state.isGetDataLoading && !state.isGetDataError,
+                onCanselEdit = viewModel::canselEditMode,
                 onStartEdit = viewModel::enableEditMode,
-                onDoneEdit = viewModel::saveData
+                onDoneEdit = viewModel::saveData,
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(paddingValues)
-                .padding(horizontal = MaterialTheme.paddings.large)
-        ) {
-            UserImage(
-                userImage = state.userImage,
-                editUserImage = state.editUserImage,
-                isEditMode = state.isEditModeEnabled,
-                onSelectImage = {
-                    singlePhonePikerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                }
+
+        if (state.isGetDataError) {
+            ErrorLoadingData(
+                onRefresh = viewModel::getUserDataFromServer,
             )
-            Spacer(Modifier.height(MaterialTheme.spacers.large))
-            Info(
-                user = state.user,
-                editUser = state.editUser,
-                isEditMode = state.isEditModeEnabled,
-                onDateClick = viewModel::showDatePiker,
-                onAboutChange = viewModel::onAboutChange,
-                onCityChange = viewModel::onCityChange
-            )
+        } else if (state.isGetDataLoading) {
+            LoadingIndicator()
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(paddingValues)
+                    .padding(horizontal = MaterialTheme.paddings.large)
+            ) {
+                UserImage(
+                    userImage = state.userImage,
+                    editUserImage = state.newUserImage,
+                    isLoading = state.isUpdateDataLoading,
+                    isEditMode = state.isEditModeEnabled,
+                    onSelectImage = {
+                        singlePhonePikerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    }
+                )
+                Spacer(Modifier.height(MaterialTheme.spacers.large))
+                UserInfo(
+                    user = state.user,
+                    editUser = state.editUser,
+                    isEditMode = state.isEditModeEnabled,
+                    isLoading = state.isUpdateDataLoading,
+                    onDateClick = viewModel::showDatePiker,
+                    onAboutChange = viewModel::onAboutChange,
+                    onCityChange = viewModel::onCityChange
+                )
+            }
         }
 
         if (state.isShowDatePiker) {
@@ -122,6 +151,35 @@ fun PersonalAreaScreen(
                 onDateSelected = viewModel::onDateSelected,
                 onDismiss = viewModel::dismissDatePiker
             )
+        }
+    }
+}
+
+@Composable
+private fun LoadingIndicator() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(25.dp))
+    }
+}
+
+@Composable
+private fun ErrorLoadingData(
+    onRefresh: () -> Unit,
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(stringResource(R.string.personal_area_screen_get_data))
+            IconButton(onClick = onRefresh) {
+                Icon(imageVector = Icons.Default.Refresh, contentDescription = "")
+            }
         }
     }
 }
@@ -171,6 +229,7 @@ private fun UserImage(
     userImage: ImageBitmap?,
     editUserImage: ImageBitmap?,
     isEditMode: Boolean,
+    isLoading: Boolean,
     onSelectImage: () -> Unit,
 ) {
 
@@ -183,32 +242,21 @@ private fun UserImage(
         Box(
             contentAlignment = Alignment.Center,
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(200.dp)
-                    .clip(CircleShape)
-                    .border(2.dp, shape = CircleShape, color = MaterialTheme.colorScheme.primary)
-                    .border(3.dp, shape = CircleShape, color = MaterialTheme.colorScheme.background)
-            ) {
-                if (image == null) {
-                    Icon(
-                        modifier = Modifier
-                            .size(150.dp)
-                            .offset(y = (30).dp),
-                        painter = painterResource(id = R.drawable.person),
-                        contentDescription = "",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    Image(
-                        contentScale = ContentScale.Crop,
-                        bitmap = image,
-                        contentDescription = ""
-                    )
-                }
-            }
-            if (isEditMode)
+
+            if (image != null) {
+                Image(
+                    modifier = Modifier
+                        .size(200.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, shape = CircleShape, color = MaterialTheme.colorScheme.primary)
+                        .border(3.dp, shape = CircleShape, color = MaterialTheme.colorScheme.background),
+                    bitmap = image,
+                    contentScale = ContentScale.Crop,
+                    contentDescription = ""
+                )
+            } else DefaultImage()
+
+            if (isEditMode && !isLoading)
                 FloatingActionButton(
                     modifier = Modifier
                         .padding(end = 20.dp)
@@ -227,11 +275,35 @@ private fun UserImage(
     }
 }
 
+
+@Composable
+private fun DefaultImage() {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(200.dp)
+            .clip(CircleShape)
+            .border(2.dp, shape = CircleShape, color = MaterialTheme.colorScheme.primary)
+            .border(3.dp, shape = CircleShape, color = MaterialTheme.colorScheme.background)
+    ) {
+        Icon(
+            modifier = Modifier
+                .size(150.dp)
+                .offset(y = (30).dp),
+            painter = painterResource(id = R.drawable.person),
+            contentDescription = "",
+            tint = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
     title: String,
     isEditMode: Boolean,
+    isUpdateDataLoading: Boolean,
+    isShowEdit: Boolean,
     onBackClick: () -> Unit,
     onCanselEdit: () -> Unit,
     onStartEdit: () -> Unit,
@@ -245,21 +317,30 @@ private fun TopBar(
             )
         },
         navigationIcon = {
+            if (!isUpdateDataLoading) IconButton({}) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "", tint = Color.Transparent) }
             if (!isEditMode) IconButton(onBackClick) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "") }
             else IconButton(onCanselEdit) { Icon(Icons.Filled.Clear, contentDescription = "") }
         },
         actions = {
-            if (!isEditMode) IconButton(onStartEdit) { Icon(Icons.Filled.Edit, contentDescription = "") }
-            else IconButton(onDoneEdit) { Icon(Icons.Filled.Check, contentDescription = "") }
+            if (isShowEdit) {
+                if (isUpdateDataLoading) CircularProgressIndicator(
+                    strokeWidth = 2.dp, modifier = Modifier
+                        .padding(end = 20.dp)
+                        .size(20.dp)
+                )
+                else if (!isEditMode) IconButton(onStartEdit) { Icon(Icons.Filled.Edit, contentDescription = "") }
+                else IconButton(onDoneEdit) { Icon(Icons.Filled.Check, contentDescription = "") }
+            }
         }
     )
 }
 
 @Composable
-private fun Info(
+private fun UserInfo(
     user: User?,
     editUser: User?,
     isEditMode: Boolean,
+    isLoading: Boolean,
     onDateClick: () -> Unit,
     onAboutChange: (String) -> Unit,
     onCityChange: (String) -> Unit,
@@ -304,7 +385,7 @@ private fun Info(
             title = stringResource(R.string.personal_area_screen_about),
             value = userShowData.status,
             onValueChange = onAboutChange,
-            editable = isEditMode,
+            editable = isEditMode && !isLoading,
         )
 
         Spacer(Modifier.height(MaterialTheme.spacers.small))
@@ -313,19 +394,19 @@ private fun Info(
             title = stringResource(R.string.personal_area_screen_city),
             value = userShowData.city,
             onValueChange = onCityChange,
-            editable = isEditMode,
+            editable = isEditMode && !isLoading,
         )
 
         Spacer(Modifier.height(MaterialTheme.spacers.small))
 
         val zodiac = getZodiacSignRId(userShowData.birthday)
-        val zodiacFormat = if(zodiac == null) "" else "(${stringResource(zodiac)})"
+        val zodiacFormat = if (zodiac == null) "" else "(${stringResource(zodiac)})"
 
         DateItem(
             title = "${stringResource(R.string.personal_area_screen_birthday)} $zodiacFormat",
             value = userShowData.birthday,
             onClick = onDateClick,
-            editable = isEditMode,
+            editable = isEditMode && !isLoading,
         )
     }
 }
@@ -349,7 +430,7 @@ private fun DateItem(
             enabled = editable,
             onClick = onClick
         ),
-        value = if (value != null) iso8601ToDateString(value, "dd.MM.yyyy") else null,
+        value = value,
         onValueChange = {},
         enable = editable,
         readOnly = true
@@ -387,7 +468,7 @@ private fun CustomTextField(
     Box {
         if (value == null && !enable) {
             Text(
-                text = "Нет данных",
+                text = stringResource(R.string.personal_area_screen_no_data),
                 style = MaterialTheme.typography.titleMedium
             )
         }

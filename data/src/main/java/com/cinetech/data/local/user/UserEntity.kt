@@ -23,5 +23,5 @@ data class UserEntity(
     val phone: String,
     val completedTask: Long?,
     @Embedded(prefix = "avatar_")
-    val avatars: AvatarData?,
+    val avatars: AvatarsEntityUrl?,
 )

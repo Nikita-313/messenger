@@ -1,10 +1,12 @@
 package com.cinetech.data.mapping
 
+import com.cinetech.data.local.avatar.AvatarEntity
 import com.cinetech.data.local.jwt_token.JwtTokenEntity
-import com.cinetech.data.local.user.AvatarData
+import com.cinetech.data.local.user.AvatarsEntityUrl
 import com.cinetech.data.local.user.UserEntity
 import com.cinetech.domain.JwtToken
-import com.cinetech.domain.model.Avatar
+import com.cinetech.domain.model.AvatarData
+import com.cinetech.domain.model.AvatarsUrl
 import com.cinetech.domain.model.User
 
 fun JwtToken.toEntity(): JwtTokenEntity {
@@ -34,8 +36,8 @@ fun User.toEntity(): UserEntity {
     )
 }
 
-fun Avatar.toAvatarData(): AvatarData {
-    return AvatarData(
+fun AvatarsUrl.toAvatarData(): AvatarsEntityUrl {
+    return AvatarsEntityUrl(
         avatar = avatar,
         bigAvatar = bigAvatar,
         miniAvatar = miniAvatar,
@@ -62,10 +64,24 @@ fun UserEntity.toDomain(): User {
     )
 }
 
-fun AvatarData.toAvatar(): Avatar {
-    return Avatar(
+fun AvatarsEntityUrl.toAvatar(): AvatarsUrl {
+    return AvatarsUrl(
         avatar = avatar,
         bigAvatar = bigAvatar,
         miniAvatar = miniAvatar,
+    )
+}
+
+fun AvatarData.toEntity(): AvatarEntity {
+    return AvatarEntity(
+        filename = filename,
+        base64 = base64
+    )
+}
+
+fun AvatarEntity.toDomain(): AvatarData {
+    return AvatarData(
+        filename = filename,
+        base64 = base64
     )
 }

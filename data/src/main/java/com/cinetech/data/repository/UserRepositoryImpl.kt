@@ -1,8 +1,13 @@
 package com.cinetech.data.repository
 
+import com.cinetech.data.mapping.toAvatar
 import com.cinetech.data.mapping.toDomain
+import com.cinetech.data.mapping.toRequest
 import com.cinetech.data.remote.UserService
 import com.cinetech.domain.exeption.UnknownException
+import com.cinetech.domain.exeption.ValidationException
+import com.cinetech.domain.model.AvatarsUrl
+import com.cinetech.domain.model.UpdateUserData
 import com.cinetech.domain.model.User
 import com.cinetech.domain.repository.UserRepository
 import com.cinetech.domain.utils.Response
@@ -34,4 +39,23 @@ class UserRepositoryImpl @Inject constructor(
         }.flowOn(Dispatchers.IO)
     }
 
+    override fun updateUser(updateUserData: UpdateUserData): Flow<Response<out AvatarsUrl?>> {
+        return flow {
+            emit(Response.Loading)
+            val response = userService.updateUser(updateUserData.toRequest())
+            if (!response.isSuccessful) {
+                if(response.code() == 422) throw ValidationException(response.message())
+                throw UnknownException(response.message())
+            }
+            val body = response.body() ?: throw UnknownException()
+            emit(Response.Success(body.avatars?.toAvatar()))
+        }.catch { e ->
+            emit(
+                Response.Error(
+                    message = e.message,
+                    throwable = e
+                )
+            )
+        }.flowOn(Dispatchers.IO)
+    }
 }

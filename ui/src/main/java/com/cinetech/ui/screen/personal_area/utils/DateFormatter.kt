@@ -1,4 +1,4 @@
-package com.cinetech.ui.core
+package com.cinetech.ui.screen.personal_area.utils
 
 import com.cinetech.ui.R
 import java.text.SimpleDateFormat
@@ -7,34 +7,24 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-const val ISO8601Patter = "yyyy-MM-dd'T'HH:mm:ssXXX"
+const val pattern = "yyyy-MM-dd"
 
-fun formatMillisToISO8601(millis: Long): String {
+fun millisToDate(millis: Long): String {
+    val dateFormat = SimpleDateFormat(pattern, Locale.getDefault())
     val date = Date(millis)
-    val sdf = SimpleDateFormat(ISO8601Patter, Locale.getDefault())
-    sdf.timeZone = TimeZone.getTimeZone("UTC")
-    return sdf.format(date)
+    return dateFormat.format(date)
 }
 
-fun iso8601ToDateString(iso8601String: String, outputPattern: String): String? {
-    val inputFormat = SimpleDateFormat(ISO8601Patter, Locale.getDefault())
-    inputFormat.timeZone = TimeZone.getTimeZone("UTC")
-    return try {
-        val date = inputFormat.parse(iso8601String)
-        val outputFormat = SimpleDateFormat(outputPattern, Locale.getDefault())
-        outputFormat.format(date)
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
-    }
-}
-
-fun getZodiacSignRId(iso8601String: String?): Int? {
-    if (iso8601String == null) return null
-    val format = SimpleDateFormat(ISO8601Patter, Locale.getDefault())
+fun getZodiacSignRId(date: String?): Int? {
+    if (date == null) return null
+    val format = SimpleDateFormat(pattern, Locale.getDefault())
     format.timeZone = TimeZone.getTimeZone("UTC")
 
-    val date = format.parse(iso8601String)
+    val date = try {
+        format.parse(date)
+    } catch (e: Exception) {
+        return null
+    }
 
     val calendar = Calendar.getInstance()
     calendar.time = date

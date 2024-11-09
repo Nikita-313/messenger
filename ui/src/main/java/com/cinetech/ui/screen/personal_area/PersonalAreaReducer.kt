@@ -13,10 +13,6 @@ class PersonalAreaReducer : Reducer<PersonalAreaUiState, PersonalAreaUiEvent, Pe
                 previousState.copy(isEditModeEnabled = event.isEnable) to null
             }
 
-            is PersonalAreaUiEvent.UpdateLoading -> {
-                previousState.copy(isLoading = event.isLoading) to null
-            }
-
             is PersonalAreaUiEvent.UpdateUserData -> {
                 previousState.copy(user = event.user) to null
             }
@@ -29,12 +25,27 @@ class PersonalAreaReducer : Reducer<PersonalAreaUiState, PersonalAreaUiEvent, Pe
                 previousState.copy(editUser = event.user) to null
             }
 
-            is PersonalAreaUiEvent.UpdateEditUserImage -> {
-                previousState.copy(editUserImage = event.image) to null
-            }
-
             is PersonalAreaUiEvent.UpdateUserImage -> {
                 previousState.copy(userImage = event.image) to null
+            }
+
+            is PersonalAreaUiEvent.UpdateLoadingNewData -> {
+                previousState.copy(isUpdateDataLoading = event.isLoading) to null
+            }
+
+            is PersonalAreaUiEvent.UpdateUserAvatarData -> {
+                previousState.copy(updateAvatarData = event.updateAvatarData) to null
+            }
+
+            is PersonalAreaUiEvent.UpdateUserNewImage -> {
+                previousState.copy(newUserImage = event.image) to null
+            }
+
+            is PersonalAreaUiEvent.UpdateLoadingGetData -> {
+                previousState.copy(isGetDataLoading = event.isLoading) to null
+            }
+            is PersonalAreaUiEvent.UpdateErrorGetData -> {
+                previousState.copy(isGetDataError = event.isError) to null
             }
         }
     }

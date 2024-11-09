@@ -34,6 +34,9 @@
     <string name="personal_area_screen_birthday">Дата рождения</string>
     <string name="personal_area_screen_select">Выбрать</string>
     <string name="personal_area_screen_cansel">Отмена</string>
+    <string name="personal_area_screen_no_data">Нет данных</string>
+    <string name="personal_area_screen_update_error">Ошибка. Не удалось обновить данные</string>
+    <string name="personal_area_screen_get_data">Ошибка при загрузке данных</string>
 
     <string name="aries">Овен</string>
     <string name="taurus">Телец</string>

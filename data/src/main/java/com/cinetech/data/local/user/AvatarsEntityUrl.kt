@@ -1,6 +1,6 @@
-package com.cinetech.domain.model
+package com.cinetech.data.local.user
 
-data class Avatar(
+data class AvatarsEntityUrl(
     val avatar: String?,
     val bigAvatar: String,
     val miniAvatar: String,

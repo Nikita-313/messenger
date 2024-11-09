@@ -42,7 +42,7 @@ android {
 dependencies {
     implementation(project(":domain"))
 
-    implementation(libs.glide)
+    implementation(libs.bundles.coil3)
 
     implementation(libs.googlecode)
 

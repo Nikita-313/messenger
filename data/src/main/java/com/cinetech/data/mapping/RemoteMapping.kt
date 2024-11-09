@@ -1,15 +1,18 @@
 package com.cinetech.data.mapping
 
 import com.cinetech.data.remote.model.AvatarApi
+import com.cinetech.data.remote.model.AvatarUpdateApi
 import com.cinetech.data.remote.model.CheckAuthCodeResponse
-import com.cinetech.data.remote.model.GetUserResponse
 import com.cinetech.data.remote.model.ProfileDataApi
 import com.cinetech.data.remote.model.RegisterUserRequest
 import com.cinetech.data.remote.model.RegisterUserResponse
-import com.cinetech.domain.model.Avatar
+import com.cinetech.data.remote.model.UpdateUserRequest
+import com.cinetech.domain.model.AvatarsUrl
 import com.cinetech.domain.model.LoginAuthData
 import com.cinetech.domain.model.RegisterAuthData
 import com.cinetech.domain.model.RegisterUserData
+import com.cinetech.domain.model.AvatarData
+import com.cinetech.domain.model.UpdateUserData
 import com.cinetech.domain.model.User
 
 fun CheckAuthCodeResponse.toDomain(): LoginAuthData {
@@ -56,10 +59,31 @@ fun ProfileDataApi.toDomain(): User {
         avatars = avatars?.toAvatar(),
     )
 }
-fun AvatarApi.toAvatar(): Avatar {
-    return Avatar(
+
+fun AvatarApi.toAvatar(): AvatarsUrl {
+    return AvatarsUrl(
         avatar = avatar,
         bigAvatar = bigAvatar,
         miniAvatar = miniAvatar,
+    )
+}
+
+fun UpdateUserData.toRequest(): UpdateUserRequest {
+    return UpdateUserRequest(
+        name = name,
+        username = username,
+        birthday = birthday,
+        city = city,
+        vk = vk,
+        instagram = instagram,
+        status = status,
+        avatar = avatar?.toApi(),
+    );
+}
+
+fun AvatarData.toApi(): AvatarUpdateApi {
+    return AvatarUpdateApi(
+        filename = filename,
+        base_64 = base64,
     )
 }
