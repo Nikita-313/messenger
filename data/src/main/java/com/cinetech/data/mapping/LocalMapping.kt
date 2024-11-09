@@ -16,6 +16,13 @@ fun JwtToken.toEntity(): JwtTokenEntity {
     )
 }
 
+fun JwtTokenEntity.toDomain(): JwtToken {
+    return JwtToken(
+        refreshToken = refreshToken,
+        accessToken = accessToken,
+    )
+}
+
 fun User.toEntity(): UserEntity {
     return UserEntity(
         userId = userId,

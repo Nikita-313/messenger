@@ -41,6 +41,8 @@ android {
 
 dependencies {
     implementation(project(":domain"))
+    
+    implementation(libs.splashscreen)
 
     implementation(libs.bundles.coil3)
 

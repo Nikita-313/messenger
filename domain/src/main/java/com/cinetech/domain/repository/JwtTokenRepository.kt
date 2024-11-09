@@ -6,6 +6,8 @@ interface JwtTokenRepository {
 
     suspend fun save(jwt: JwtToken)
 
+    suspend fun getToken():JwtToken?
+
     suspend fun updateRefreshToken(refreshToken:String)
 
     suspend fun updateAccessToken(accessToken:String)

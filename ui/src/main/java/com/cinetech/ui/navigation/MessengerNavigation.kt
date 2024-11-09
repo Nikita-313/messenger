@@ -18,11 +18,12 @@ import com.cinetech.ui.screen.sms_verification.SmsVerificationScreen
 
 @Composable
 fun MessengerNavHost(
+    startDestination:Screen,
     navHostController: NavHostController = rememberNavController(),
 ) {
     NavHost(
         navController = navHostController,
-        startDestination = Screen.AuthGraph
+        startDestination = startDestination
     ) {
 
         composable<Screen.PersonalArea> {
